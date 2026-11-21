@@ -1,0 +1,8 @@
+#include "resource.h"
+#ifdef WL2DC
+IDR_MAIN RCDATA "..\\..\\build\\dc\\main.lz"
+IDR_DEFS RCDATA "..\\..\\build\\dc\\defs.lz"
+#else
+IDR_MAIN RCDATA "..\\..\\build\\classic\\main.lz"
+IDR_DEFS RCDATA "..\\..\\build\\classic\\defs.lz"
+#endif

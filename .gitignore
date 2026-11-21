@@ -1,0 +1,7 @@
+build/
+work/
+capture/
+text/
+test/
+CLAUDE.md
+__pycache__/
