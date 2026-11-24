@@ -1,3 +1,5 @@
+#pragma code_page(65001)
+#include <winver.h>
 #include "resource.h"
 #ifdef WL2DC
 IDR_MAIN RCDATA "..\\..\\build\\dc\\main.lz"
@@ -6,3 +8,29 @@ IDR_DEFS RCDATA "..\\..\\build\\dc\\defs.lz"
 IDR_MAIN RCDATA "..\\..\\build\\classic\\main.lz"
 IDR_DEFS RCDATA "..\\..\\build\\classic\\defs.lz"
 #endif
+
+1 VERSIONINFO
+FILEVERSION 1,2,0,0
+PRODUCTVERSION 1,2,0,0
+FILEOS 0x40004L
+FILETYPE VFT_DLL
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "041104B0"
+    BEGIN
+      VALUE "CompanyName", "higesho"
+      VALUE "ProductName", "ウェイストランド2 日本語化パッチ（非公式）"
+      VALUE "FileDescription", "ウェイストランド2 日本語化パッチ（非公式）"
+      VALUE "FileVersion", "1.2.0.0"
+      VALUE "ProductVersion", "1.2"
+      VALUE "InternalName", "Wasteland2_JP"
+      VALUE "OriginalFilename", "version.dll"
+      VALUE "Comments", "https://higesho.github.io/wasteland2-ja/"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0411, 1200
+  END
+END

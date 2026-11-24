@@ -3,6 +3,7 @@
  *   この DLL は、そのファイルを開こうとしたときに、DLL に埋め込んだ日本語の表（作業用フォルダに書き出したもの）を渡す。
  *   ゲームのフォルダには何も書かない。DLL を消せば英語に戻る。
  *   試験用: ゲームのフォルダに wl2jp_test があれば、窓のタイトルを "WL2JP-TEST <pid>" にし、wl2jp_log.txt に記録する。
+ *   試験用の部分は試験版（build.bat test、/DWL2JP_TEST）にだけ入る。配布版には入らない。
  */
 #include <windows.h>
 #include <stdio.h>
@@ -11,15 +12,17 @@
 
 void proxy_init(void);
 int lz4_decompress(const unsigned char *src, int srclen, unsigned char *dst, int dstlen);
-void test_init(void);
-
+#ifdef WL2JP_TEST
+void test_init(void);   /* test.c（試験版だけ） */
 static int g_test;
 static FILE *g_log;
 static CRITICAL_SECTION g_logcs;
+#endif
 static wchar_t g_cache[MAX_PATH];      /* 日本語の表（書き出したもの） */
 static wchar_t g_defs[MAX_PATH];       /* Defines_en の差し替え（あれば） */
 static wchar_t g_dir[MAX_PATH];        /* 作業用フォルダ %LOCALAPPDATA%\WL2_JP */
 
+#ifdef WL2JP_TEST
 void logf_(const char *fmt, ...)
 {
     if (!g_log) return;
@@ -29,6 +32,11 @@ void logf_(const char *fmt, ...)
     LeaveCriticalSection(&g_logcs);
     va_end(ap);
 }
+#else
+/* 配布版はログを書かない（proxy.c から呼ばれるので、中身のない関数は残す） */
+void logf_(const char *fmt, ...) { (void)fmt; }
+#define logf_(...) ((void)0)
+#endif
 
 #ifdef _WIN64
 /* ---- 64 ビット（ディレクターズカット版）: MinHook でフックする ---- */
@@ -66,7 +74,9 @@ static void *hook5(void *target, void *detour)
 }
 #endif
 
-void *hook5_any(void *target, void *detour) { return hook5(target, detour); }
+#ifdef WL2JP_TEST
+void *hook5_any(void *target, void *detour) { return hook5(target, detour); }   /* test.c から使う */
+#endif
 
 /* ---- 道の名前の置きかえ ---- */
 static int ends_with(const wchar_t *s, const wchar_t *tail)
@@ -182,6 +192,7 @@ static void init(void)
     wchar_t exe[MAX_PATH], *s;
     GetModuleFileNameW(NULL, exe, MAX_PATH);
     s = wcsrchr(exe, L'\\'); if (s) s[1] = 0;
+#ifdef WL2JP_TEST
     {
         wchar_t f[MAX_PATH];
         swprintf(f, MAX_PATH, L"%lswl2jp_test", exe);
@@ -191,6 +202,7 @@ static void init(void)
             g_log = _wfopen(f, L"w");
         }
     }
+#endif
     if (!write_res(IDR_MAIN, L"Main_en", g_cache)) g_cache[0] = 0;
     if (!write_res(IDR_DEFS, L"Defines_en", g_defs)) g_defs[0] = 0;
     logf_("cache %ls\ndefs %ls\n", g_cache, g_defs);
@@ -201,14 +213,18 @@ static void init(void)
         o_GetFileAttributesW = (GetFileAttributesW_t)hook5(GetProcAddress(kb, "GetFileAttributesW"), h_GetFileAttributesW);
         logf_("hooks %p %p %p\n", o_CreateFileW, o_GetFileAttributesExW, o_GetFileAttributesW);
     }
+#ifdef WL2JP_TEST
     if (g_test) test_init();
+#endif
 }
 
 BOOL WINAPI DllMain(HINSTANCE h, DWORD r, LPVOID v)
 {
     if (r == DLL_PROCESS_ATTACH) {
         DisableThreadLibraryCalls(h);
+#ifdef WL2JP_TEST
         InitializeCriticalSection(&g_logcs);
+#endif
         proxy_init();
         init();
     }

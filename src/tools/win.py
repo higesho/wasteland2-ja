@@ -1,5 +1,5 @@
 # 試験用：Wasteland 2 を動かす。窓は固有のタイトル "WL2JP-TEST <pid>" で探す（前面の窓は使わない）
-#   python src/tools/win.py start [classic|dc] [en]   build/<版>/version.dll を入れて起動（en: DLL なし）
+#   python src/tools/win.py start [classic|dc] [en]   build/test/<版>/version.dll（試験版）を入れて起動（en: DLL なし）
 #   python src/tools/win.py stop
 #   python src/tools/win.py shot NAME     PrintWindow で capture/NAME.png
 #   python src/tools/win.py click X Y [right] / move X Y / key K.. / type TEXT / wait MS
@@ -63,7 +63,7 @@ def start(ver, variant):
     GAME = GAMES[ver]; open(VERF, 'w').write(ver)
     dst = os.path.join(GAME, 'version.dll')
     if os.path.exists(dst): os.remove(dst)
-    if variant != 'en': shutil.copy(os.path.join(ROOT, 'build', ver, 'version.dll'), dst)
+    if variant != 'en': shutil.copy(os.path.join(ROOT, 'build', 'test', ver, 'version.dll'), dst)   # 試験版（build.bat test）
     open(os.path.join(GAME, 'wl2jp_test'), 'w').close()
     subprocess.Popen([os.path.join(GAME, 'WL2.exe'), '-screen-width', '1280', '-screen-height', '720', '-screen-fullscreen', '0'], cwd=GAME)
     for i in range(120):
